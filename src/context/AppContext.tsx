@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
-  SiteConfig, Book, AuthorEvent, ContactSubmission, NewsletterEmail 
+  SiteConfig, Book, AuthorEvent, ContactSubmission, NewsletterEmail, InfluencerApplication 
 } from '../types';
 import { defaultSiteConfig, defaultBooks, defaultEvents } from '../lib/initialData';
 
@@ -10,6 +10,7 @@ interface AppContextType {
   events: AuthorEvent[];
   submissions: ContactSubmission[];
   newsletterSignups: NewsletterEmail[];
+  influencerApps: InfluencerApplication[];
   updateConfig: (newConfig: Partial<SiteConfig>) => Promise<void>;
   addBook: (newBook: Book) => Promise<void>;
   updateBook: (updatedBook: Book) => Promise<void>;
@@ -22,6 +23,9 @@ interface AppContextType {
   deleteSubmission: (id: string) => Promise<void>;
   deleteNewsletter: (id: string) => Promise<void>;
   toggleSubmissionRead: (id: string, read: boolean) => Promise<void>;
+  submitInfluencerApp: (appData: Omit<InfluencerApplication, 'id' | 'date' | 'status'>) => Promise<void>;
+  updateInfluencerStatus: (id: string, status: 'pendiente' | 'aprobado' | 'rechazado') => Promise<void>;
+  deleteInfluencerApp: (id: string) => Promise<void>;
   isAdminAuthenticated: boolean;
   setIsAdminAuthenticated: (val: boolean) => void;
   adminPasscode: string;
@@ -40,6 +44,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [events, setEvents] = useState<AuthorEvent[]>([]);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [newsletterSignups, setNewsletterSignups] = useState<NewsletterEmail[]>([]);
+  const [influencerApps, setInfluencerApps] = useState<InfluencerApplication[]>([]);
   
   // Auth state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -105,6 +110,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newsData = await newsRes.json();
         setNewsletterSignups(newsData);
       }
+
+      // Fetch Influencer Applications
+      const inflRes = await fetch('/api/influencers', {
+        headers: { 'x-admin-passcode': pass }
+      });
+      if (inflRes.ok) {
+        const inflData = await inflRes.json();
+        setInfluencerApps(inflData);
+      }
     } catch (error) {
       console.error('Error fetching admin data:', error);
     }
@@ -122,6 +136,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       setSubmissions([]);
       setNewsletterSignups([]);
+      setInfluencerApps([]);
     }
   }, [isAdminAuthenticated, adminPasscode]);
 
@@ -348,6 +363,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNewsletterSignups(prev => prev.filter(n => n.id !== id));
   };
 
+  // Submit Influencer Application
+  const submitInfluencerApp = async (appData: Omit<InfluencerApplication, 'id' | 'date' | 'status'>) => {
+    const res = await fetch('/api/influencers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appData)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'No se pudo enviar la solicitud de colaboración.');
+    }
+
+    const data = await res.json();
+
+    // If already admin authenticated, prepopulate local list to reflect live application
+    if (isAdminAuthenticated) {
+      const newApp: InfluencerApplication = {
+        ...appData,
+        id: data.id,
+        date: new Date().toISOString().split('T')[0],
+        status: 'pendiente'
+      };
+      setInfluencerApps(prev => [newApp, ...prev]);
+    }
+  };
+
+  // Update Influencer Application Status
+  const updateInfluencerStatus = async (id: string, status: 'pendiente' | 'aprobado' | 'rechazado') => {
+    const res = await fetch(`/api/influencers/${id}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-passcode': adminPasscode
+      },
+      body: JSON.stringify({ status })
+    });
+
+    await handleApiResponse(res);
+    setInfluencerApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+  };
+
+  // Delete Influencer Application
+  const deleteInfluencerApp = async (id: string) => {
+    const res = await fetch(`/api/influencers/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-admin-passcode': adminPasscode
+      }
+    });
+
+    await handleApiResponse(res);
+    setInfluencerApps(prev => prev.filter(a => a.id !== id));
+  };
+
   // Login handler
   const triggerLogin = async (passcode: string): Promise<boolean> => {
     try {
@@ -386,6 +456,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       events,
       submissions,
       newsletterSignups,
+      influencerApps,
       updateConfig,
       addBook,
       updateBook,
@@ -398,6 +469,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteSubmission,
       deleteNewsletter,
       toggleSubmissionRead,
+      submitInfluencerApp,
+      updateInfluencerStatus,
+      deleteInfluencerApp,
       isAdminAuthenticated,
       setIsAdminAuthenticated,
       adminPasscode,

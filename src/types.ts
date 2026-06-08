@@ -77,3 +77,17 @@ export interface SiteConfig {
   footerRights?: string;
   genres?: string[];
 }
+
+export interface InfluencerApplication {
+  id: string;
+  name: string;
+  email: string;
+  platform: 'BookTok' | 'Bookstagram' | 'Both' | 'Other';
+  handle: string;
+  followers: number;
+  selectedBookId: string;
+  postLink?: string;
+  message: string;
+  date: string;
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+}

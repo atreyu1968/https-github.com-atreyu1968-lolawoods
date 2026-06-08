@@ -72,6 +72,20 @@ db.exec(`
     email TEXT NOT NULL UNIQUE,
     date TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS influencer_applications (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    handle TEXT NOT NULL,
+    followers INTEGER NOT NULL,
+    selectedBookId TEXT NOT NULL,
+    postLink TEXT,
+    message TEXT NOT NULL,
+    date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pendiente'
+  );
 `);
 
 // -------------------------------------------------------------
@@ -524,6 +538,53 @@ app.delete('/api/newsletter/:id', requireAdmin, (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// --- Influencer Applications ---
+app.get('/api/influencers', requireAdmin, (req, res) => {
+  try {
+    const rows = db.prepare("SELECT * FROM influencer_applications ORDER BY date DESC").all() as any[];
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/influencers', (req, res) => {
+  try {
+    const s = req.body;
+    const id = 'infl_' + Math.random().toString(36).substring(2, 11);
+    const date = new Date().toISOString().split('T')[0];
+    db.prepare(`
+      INSERT INTO influencer_applications (id, name, email, platform, handle, followers, selectedBookId, postLink, message, date, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')
+    `).run(id, s.name, s.email, s.platform, s.handle, Number(s.followers || 0), s.selectedBookId, s.postLink || '', s.message, date);
+    res.json({ success: true, id });
+  } catch (err: any) {
+    res.status(550).json({ error: err.message });
+  }
+});
+
+app.put('/api/influencers/:id/status', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    db.prepare("UPDATE influencer_applications SET status = ? WHERE id = ?").run(status, id);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/influencers/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    db.prepare("DELETE FROM influencer_applications WHERE id = ?").run(id);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Serve frontend with Vite middleware in dev or static files in prod
 async function boot() {

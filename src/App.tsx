@@ -31,7 +31,10 @@ import {
   Bell,
   Eye,
   EyeOff,
-  RefreshCw
+  RefreshCw,
+  Sparkles,
+  Users,
+  Award
 } from 'lucide-react';
 
 function LolaWoodsSite() {
@@ -41,6 +44,7 @@ function LolaWoodsSite() {
     events,
     submissions,
     newsletterSignups,
+    influencerApps,
     updateConfig,
     addBook,
     updateBook,
@@ -53,6 +57,9 @@ function LolaWoodsSite() {
     deleteSubmission,
     deleteNewsletter,
     toggleSubmissionRead,
+    submitInfluencerApp,
+    updateInfluencerStatus,
+    deleteInfluencerApp,
     isAdminAuthenticated,
     triggerLogin,
     triggerLogout,
@@ -60,11 +67,24 @@ function LolaWoodsSite() {
   } = useApp();
 
   // Navigation and UI state
-  const [activeTab, setActiveTab] = useState<'home' | 'books' | 'bio' | 'events' | 'contact' | 'admin'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'books' | 'bio' | 'events' | 'contact' | 'collabs' | 'admin'>('home');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [newGenreName, setNewGenreName] = useState('');
+
+  // Influencer form states
+  const [inflName, setInflName] = useState('');
+  const [inflEmail, setInflEmail] = useState('');
+  const [inflPlatform, setInflPlatform] = useState<'BookTok' | 'Bookstagram' | 'Both' | 'Other'>('BookTok');
+  const [inflHandle, setInflHandle] = useState('');
+  const [inflFollowers, setInflFollowers] = useState('');
+  const [inflBookId, setInflBookId] = useState('');
+  const [inflPostLink, setInflPostLink] = useState('');
+  const [inflMessage, setInflMessage] = useState('');
+  const [inflSuccess, setInflSuccess] = useState<string | null>(null);
+  const [inflError, setInflError] = useState<string | null>(null);
+  const [inflLoading, setInflLoading] = useState(false);
 
   // Contact form states
   const [contactName, setContactName] = useState('');
@@ -229,6 +249,58 @@ function LolaWoodsSite() {
     }
   };
 
+  // Submit Influencer Application
+  const handleInfluencerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInflError(null);
+    setInflSuccess(null);
+
+    if (!inflName || !inflEmail || !inflPlatform || !inflHandle || !inflFollowers || !inflBookId || !inflMessage) {
+      setInflError("Por favor, rellene todos los campos requeridos marcados con (*)");
+      return;
+    }
+
+    const followerCount = parseInt(inflFollowers, 10);
+    if (isNaN(followerCount) || followerCount < 0) {
+      setInflError("Por favor, ingrese un número válido de seguidores.");
+      return;
+    }
+
+    // Demostrar que son influencers: check if follower count matches standard criteria
+    if (followerCount < 500) {
+      setInflError("Para calificar en este programa de envío gratis de novelas, se requiere demostrar que eres influencer activo con un mínimo de 500 seguidores reales.");
+      return;
+    }
+
+    setInflLoading(true);
+
+    try {
+      await submitInfluencerApp({
+        name: inflName,
+        email: inflEmail,
+        platform: inflPlatform,
+        handle: inflHandle,
+        followers: followerCount,
+        selectedBookId: inflBookId,
+        postLink: inflPostLink || '',
+        message: inflMessage
+      });
+
+      setInflSuccess("¡Excelente! Tu solicitud como influencer de Bookstagram / BookTok ha sido enviada con éxito. Lola y su equipo literario analizarán tu perfil para enviarte tu ejemplar gratuito si cumples con las condiciones.");
+      setInflName('');
+      setInflEmail('');
+      setInflHandle('');
+      setInflFollowers('');
+      setInflBookId('');
+      setInflPostLink('');
+      setInflMessage('');
+    } catch (err: any) {
+      setInflError(err.message || "No se pudo enviar tu solicitud.");
+    } finally {
+      setInflLoading(false);
+    }
+  };
+
   // Submit Newsletter Signup Form
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -365,11 +437,11 @@ function LolaWoodsSite() {
         : 'bg-neutral-50/60'
     }`}>
       
-      {/* 🌸 Sol Andaluz Custom Header Announcement Banner 🌸 */}
+      {/* 🌸 Estilo Patio Romántico - Custom Header Announcement Banner 🌸 */}
       {config.themeColor === 'patio' && (
         <div id="patio-announcement-banner" className="bg-gradient-to-r from-sky-400 via-rose-450 to-amber-400 text-stone-900 py-1.5 px-4 text-center text-xs font-bold tracking-wide flex items-center justify-center gap-1.5 shadow-sm border-b border-rose-350 select-none animate-fade-in duration-300">
           <span className="animate-spin-slow">🌸</span>
-          <span>¡Bienvenidos al Patio de Lola Woods! Romances, risas y enredos bajo el sol andaluz ☀️</span>
+          <span>¡Bienvenidos al Patio de Lola Woods! Comedias románticas, risas y enredos asegurados ☀️</span>
           <span className="hidden sm:inline">🌸</span>
         </div>
       )}
@@ -396,6 +468,7 @@ function LolaWoodsSite() {
                 { label: 'Obras', tab: 'books' },
                 { label: 'Biografía', tab: 'bio' },
                 { label: 'Eventos', tab: 'events' },
+                { label: 'BookTok & Insta Colab', tab: 'collabs' },
                 { label: 'Contacto', tab: 'contact' },
               ].map((item) => (
                 <button
@@ -437,6 +510,7 @@ function LolaWoodsSite() {
               { label: 'Obras & Catálogo', tab: 'books' },
               { label: 'Biografía', tab: 'bio' },
               { label: 'Eventos & Firmas', tab: 'events' },
+              { label: 'BookTok & Insta Colab', tab: 'collabs' },
               { label: 'Contacto Directo', tab: 'contact' },
             ].map((item) => (
               <button
@@ -1071,6 +1145,218 @@ function LolaWoodsSite() {
             )}
 
             {/* -------------------------------------------------------------
+                TAB 5.5: COLABORACIONES (BOOKTOKERS & BOOKSTAGRAMMERS)
+                ------------------------------------------------------------- */}
+            {activeTab === 'collabs' && (
+              <div id="section-collabs" className="space-y-8 animate-fade-in duration-300 max-w-4xl mx-auto pb-12">
+                <div className="text-center space-y-3">
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-amber-100 ${activeTheme.primary}`}>
+                    <Sparkles className="w-3.5 h-3.5" /> Colaboraciones Literarias
+                  </div>
+                  <h1 className="font-serif text-4xl font-black tracking-tight text-neutral-900">
+                    Club de BookTokers & Bookstagrammers
+                  </h1>
+                  <p className="text-neutral-600 text-sm max-w-xl mx-auto leading-relaxed">
+                    ¿Te apasiona la comedia de enredos, las historias de amor divertidas y las novelas llenas de risas? Consigue un ejemplar impreso o digital de mis novelas gratis a cambio de una reseña en tu canal de BookTok o cuenta de Instagram.
+                  </p>
+                </div>
+
+                {/* Requirements details banner */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50/60 rounded-xl p-6 border border-amber-200/60 shadow-sm grid md:grid-cols-3 gap-6">
+                  <div id="collab-req-card-1" className="bg-white/80 backdrop-blur-sm rounded-lg p-5 border border-amber-100 space-y-2">
+                    <div className={`p-2 rounded-lg bg-amber-50 w-fit text-amber-700`}>
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <h4 className="font-serif text-sm font-bold text-neutral-800">1. Demostrar ser Influencer</h4>
+                    <p className="text-neutral-500 text-xs leading-relaxed">
+                      Necesitas tener una cuenta pública activa en **Instagram** o **TikTok** con un mínimo de **500 seguidores** reales dedicados al mundo literario.
+                    </p>
+                  </div>
+
+                  <div id="collab-req-card-2" className="bg-white/80 backdrop-blur-sm rounded-lg p-5 border border-amber-100 space-y-2">
+                    <div className="p-2 rounded-lg bg-rose-50 w-fit text-rose-700">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h4 className="font-serif text-sm font-bold text-neutral-800">2. Escoge tu Próxima Novela</h4>
+                    <p className="text-neutral-500 text-xs leading-relaxed">
+                      Elige en el formulario cuál de nuestras obras te entusiasma reseñar. Si eres seleccionado, te enviaremos el ebook o libro impreso gratuitamente.
+                    </p>
+                  </div>
+
+                  <div id="collab-req-card-3" className="bg-white/80 backdrop-blur-sm rounded-lg p-5 border border-amber-100 space-y-2">
+                    <div className="p-2 rounded-lg bg-emerald-50 w-fit text-emerald-700">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <h4 className="font-serif text-sm font-bold text-neutral-800">3. Sube tu Reseña</h4>
+                    <p className="text-neutral-500 text-xs leading-relaxed">
+                      Te comprometes a compartir una valoración y reseña honesta en tus redes sociales en un plazo de 30 días posteriores al recibimiento del ejemplar.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Form area */}
+                <div className="bg-white border border-neutral-200 rounded-xl p-6 md:p-10 shadow-sm">
+                  <div className="border-b border-neutral-100 pb-4 mb-6">
+                    <h3 className="font-serif text-lg font-bold text-neutral-800">Formulario de Solicitud de Ejemplar Gratuito</h3>
+                    <p className="text-xs text-neutral-500">Por favor, rellena todos los datos de forma verídica. Revisamos cada perfil de manera pormenorizada.</p>
+                  </div>
+
+                  <form onSubmit={handleInfluencerSubmit} className="space-y-6">
+                    {inflError && (
+                      <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-sm rounded-lg flex gap-2">
+                        <X className="w-5 h-5 shrink-0 text-rose-600" />
+                        <span>{inflError}</span>
+                      </div>
+                    )}
+
+                    {inflSuccess && (
+                      <div className="p-5 bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm rounded-lg flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-emerald-600" />
+                          <span className="font-bold">¡Solicitud recibida correctamente!</span>
+                        </div>
+                        <p className="text-xs text-emerald-700 leading-relaxed">{inflSuccess}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5 animate-focus">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Tu Nombre / Pseudónimo *</label>
+                        <input
+                          id="infl-name-input"
+                          type="text"
+                          required
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 placeholder:text-stone-400"
+                          placeholder="Tu nombre real o seudónimo de reseñador"
+                          value={inflName}
+                          onChange={(e) => setInflName(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Tu Email de Contacto *</label>
+                        <input
+                          id="infl-email-input"
+                          type="email"
+                          required
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 placeholder:text-stone-400"
+                          placeholder="nombre@ejemplo.com"
+                          value={inflEmail}
+                          onChange={(e) => setInflEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Red Social Principal *</label>
+                        <select
+                          id="infl-platform-select"
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 bg-white"
+                          value={inflPlatform}
+                          onChange={(e: any) => setInflPlatform(e.target.value)}
+                        >
+                          <option value="BookTok">BookTok (TikTok)</option>
+                          <option value="Bookstagram">Bookstagram (Instagram)</option>
+                          <option value="Both">Ambas plataformas</option>
+                          <option value="Other">Otro canal (Blog / YouTube / Podcast / Goodreads)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Tu @Usuario / Enlace del canal *</label>
+                        <input
+                          id="infl-handle-input"
+                          type="text"
+                          required
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 placeholder:text-stone-400"
+                          placeholder="@mi_canal o link directo"
+                          value={inflHandle}
+                          onChange={(e) => setInflHandle(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Número de Seguidores / Comunidad *</label>
+                        <input
+                          id="infl-followers-input"
+                          type="number"
+                          required
+                          min="0"
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 placeholder:text-stone-400"
+                          placeholder=" p. ej. 1250"
+                          value={inflFollowers}
+                          onChange={(e) => setInflFollowers(e.target.value)}
+                        />
+                        <span className="text-[10px] text-neutral-400 leading-relaxed block">Mínimo 500 para el envío de ejemplar para reseñar.</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Novela solicitada para reseñar *</label>
+                        <select
+                          id="infl-book-select"
+                          required
+                          className="w-full px-3.5 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 bg-white"
+                          value={inflBookId}
+                          onChange={(e) => setInflBookId(e.target.value)}
+                        >
+                          <option value="">-- Selecciona una de mis novelas --</option>
+                          {books.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">Enlace a reseña previa (opcional)</label>
+                        <input
+                          id="infl-postlink-input"
+                          type="text"
+                          className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 placeholder:text-stone-400"
+                          placeholder="https://tiktok.com/@... o similar"
+                          value={inflPostLink}
+                          onChange={(e) => setInflPostLink(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-neutral-600 font-mono uppercase tracking-wider block">¿Por qué quieres colaborar con Lola Woods y cómo planificas tu reseña? *</label>
+                      <textarea
+                        id="infl-message-input"
+                        rows={4}
+                        required
+                        className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-450 leading-relaxed placeholder:text-stone-400"
+                        placeholder="Escribe brevemente sobre ti, qué tipo de reseñas te gusta subir, tus formatos favoritos y por qué quieres leer la obra elegida."
+                        value={inflMessage}
+                        onChange={(e) => setInflMessage(e.target.value)}
+                      />
+                    </div>
+
+                    <button
+                      id="infl-submit-btn"
+                      type="submit"
+                      disabled={inflLoading}
+                      className={`w-full py-3 rounded-lg text-sm font-semibold tracking-wider uppercase transition-colors text-white flex items-center justify-center gap-2 ${
+                        inflLoading ? 'bg-amber-300 cursor-not-allowed' : `${activeTheme.primaryBg} ${activeTheme.primaryBgHover}`
+                      }`}
+                    >
+                      {inflLoading ? (
+                        <>Procesando tu solicitud...</>
+                      ) : (
+                        <><Sparkles className="w-4 h-4" /> Solicitar novela gratis de Lola Woods</>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* -------------------------------------------------------------
                 TAB 6: PANEL ADMIN (THE HEART CONFIGURATION)
                 ------------------------------------------------------------- */}
             {activeTab === 'admin' && (
@@ -1351,7 +1637,7 @@ function LolaWoodsSite() {
                               value={configForm.themeColor || 'rose'}
                               onChange={(e) => setConfigForm({ ...configForm, themeColor: e.target.value as any })}
                             >
-                              <option value="patio">Sol Andaluz (Patio, Flores & Enredos) 🌸 - Temático</option>
+                              <option value="patio">Estilo Patio Romántico (Flores, Cielo & Enredos) 🌸 - Temático</option>
                               <option value="rose">Fucsia Romántico (Chicle & Enredos)</option>
                               <option value="gold">Melocotón Divertido (Coral & Risas)</option>
                               <option value="emerald">Menta Fresca (Amigas & Confusiones)</option>
@@ -1966,6 +2252,136 @@ function LolaWoodsSite() {
                                 </button>
                               </div>
                             ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* SUB-SECTION E: INFLUENCER APPLICATIONS */}
+                      <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm space-y-4">
+                        <div className="flex justify-between items-center border-b pb-2">
+                          <h3 className="font-serif text-base font-bold text-stone-850 flex items-center gap-1.5">
+                            <Sparkles className="w-5 h-5 text-amber-500" /> 6. Peticiones de BookTok / Instagram ({influencerApps.length})
+                          </h3>
+                        </div>
+
+                        {influencerApps.length === 0 ? (
+                          <div className="text-center py-6 text-neutral-400 text-xs italic">
+                            No hay solicitudes de BookTok/Insta registradas actualmente.
+                          </div>
+                        ) : (
+                          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                            {influencerApps.map((app) => {
+                              const requestedBookTitle = books.find(b => b.id === app.selectedBookId)?.title || app.selectedBookId;
+                              
+                              return (
+                                <div
+                                  id={`influencer-app-${app.id}`}
+                                  key={app.id}
+                                  className={`p-4 border rounded-xl space-y-3 text-xs relative ${
+                                    app.status === 'aprobado'
+                                      ? 'bg-emerald-50/20 border-emerald-100'
+                                      : app.status === 'rechazado'
+                                      ? 'bg-rose-50/20 border-rose-100'
+                                      : 'bg-amber-50/10 border-amber-100/70'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start gap-3">
+                                    <div className="min-w-0">
+                                      <p className="font-black text-stone-850 text-sm leading-snug">
+                                        {app.name} <span className="font-normal text-xs text-neutral-400 font-mono">({app.email})</span>
+                                      </p>
+                                      
+                                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide ${
+                                          app.platform === 'BookTok'
+                                            ? 'bg-stone-900 text-white'
+                                            : app.platform === 'Bookstagram'
+                                            ? 'bg-pink-100 text-pink-700 border border-pink-200'
+                                            : app.platform === 'Both'
+                                            ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                                            : 'bg-blue-100 text-blue-700 border border-blue-200'
+                                        }`}>
+                                          {app.platform}
+                                        </span>
+                                        <span className="font-mono text-stone-600 font-bold underline bg-neutral-100 px-1.5 py-0.5 rounded text-[10px]">
+                                          {app.handle}
+                                        </span>
+                                        <span className="text-[11px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                          🔥 {app.followers.toLocaleString()} seguidores
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Action items status change */}
+                                    <div className="flex gap-1.5 shrink-0">
+                                      <button
+                                        id={`approve-infl-btn-${app.id}`}
+                                        className={`p-1.5 border rounded-lg transition-all ${
+                                          app.status === 'aprobado'
+                                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                                            : 'border-zinc-200 text-emerald-600 bg-white hover:bg-emerald-50'
+                                        }`}
+                                        onClick={() => updateInfluencerStatus(app.id, 'aprobado')}
+                                        title="Aprobar solicitud y acordar envío"
+                                      >
+                                        <Check className="w-3.5 h-3.5" />
+                                      </button>
+                                      
+                                      <button
+                                        id={`reject-infl-btn-${app.id}`}
+                                        className={`p-1.5 border rounded-lg transition-all ${
+                                          app.status === 'rechazado'
+                                            ? 'bg-neutral-800 border-neutral-800 text-white'
+                                            : 'border-zinc-200 text-zinc-500 bg-white hover:bg-neutral-50'
+                                        }`}
+                                        onClick={() => updateInfluencerStatus(app.id, 'rechazado')}
+                                        title="Rechazar solicitud"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      <button
+                                        id={`delete-infl-btn-${app.id}`}
+                                        className="p-1.5 border border-zinc-200 rounded-lg text-rose-500 hover:text-white hover:bg-rose-600 hover:border-rose-600 bg-white transition-all"
+                                        onClick={() => deleteInfluencerApp(app.id)}
+                                        title="Eliminar solicitud permanentemente"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-white/70 rounded-lg p-2.5 border border-stone-100 space-y-1.5">
+                                    <p className="text-[10px] text-stone-500 font-mono uppercase tracking-wider block">
+                                      Libro solicitado: <span className="font-serif font-black underline text-stone-800">{requestedBookTitle}</span>
+                                    </p>
+                                    
+                                    {app.postLink && (
+                                      <p className="text-[10px] text-stone-500 truncate font-mono">
+                                        Reseña previa de ej.: <a href={app.postLink} target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">{app.postLink}</a>
+                                      </p>
+                                    )}
+
+                                    <p className="text-stone-700 leading-relaxed font-serif text-[12.5px] border-t border-dashed border-stone-100 pt-1.5 whitespace-pre-line">
+                                      &ldquo;{app.message}&rdquo;
+                                    </p>
+                                  </div>
+
+                                  <div className="flex justify-between items-center text-[10px]">
+                                    <span className="text-neutral-400 font-mono">Registrado el {app.date}</span>
+                                    <span className={`px-2 py-0.5 rounded font-bold font-mono tracking-wider text-[9px] uppercase ${
+                                      app.status === 'aprobado'
+                                        ? 'bg-emerald-100 text-emerald-800'
+                                        : app.status === 'rechazado'
+                                        ? 'bg-neutral-200 text-neutral-850'
+                                        : 'bg-amber-100 text-amber-800 animate-pulse'
+                                    }`}>
+                                      {app.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
