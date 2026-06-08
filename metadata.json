@@ -1,0 +1,6 @@
+{
+  "name": "Lola Woods - Sitio Oficial",
+  "description": "Sitio web oficial y panel de control para la autora Lola Woods, que permite configurar secciones de texto, gestionar catálogo de libros con portadas, biografías y novedades de manera persistente.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
