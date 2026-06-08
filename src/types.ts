@@ -72,7 +72,7 @@ export interface SiteConfig {
   socialInstagram?: string;
   socialFacebook?: string;
   socialGoodreads?: string;
-  themeColor: 'gold' | 'emerald' | 'rose' | 'amber' | 'slate';
+  themeColor: 'gold' | 'emerald' | 'rose' | 'amber' | 'slate' | 'patio';
   adminPasscode: string;
   footerRights?: string;
   genres?: string[];

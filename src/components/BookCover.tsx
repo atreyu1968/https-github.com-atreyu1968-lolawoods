@@ -25,7 +25,12 @@ export default function BookCover({ book, size = 'md', hoverEffect = true }: Boo
     let accentColor = 'bg-amber-500/10 text-amber-400';
     let labelColor = 'text-amber-200';
 
-    if (genreLower.includes('histór')) {
+    if (genreLower.includes('comedia') || genreLower.includes('patio') || genreLower.includes('enredo') || genreLower.includes('humor') || genreLower.includes('divertido')) {
+      bgGradient = 'from-sky-400 via-rose-400 to-amber-300';
+      borderColor = 'border-white/45 text-rose-950';
+      accentColor = 'bg-white/40 text-rose-900 font-bold';
+      labelColor = 'text-stone-800/75';
+    } else if (genreLower.includes('histór')) {
       bgGradient = 'from-slate-900 via-slate-950 to-stone-950';
       borderColor = 'border-amber-500/30 text-amber-200';
       accentColor = 'bg-amber-500/10 text-amber-300';

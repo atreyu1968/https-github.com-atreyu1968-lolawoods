@@ -165,6 +165,18 @@ function LolaWoodsSite() {
       solidHeader: 'from-purple-500 to-indigo-600',
       textAccent: 'text-purple-500',
       badgeBorder: 'border-purple-300'
+    },
+    patio: {
+      primary: 'text-rose-500',
+      primaryBg: 'bg-rose-500',
+      primaryBgHover: 'hover:bg-rose-600',
+      accentBg: 'bg-rose-50/30',
+      borderAccent: 'border-rose-100',
+      focusRing: 'focus:ring-rose-450',
+      badgeBg: 'bg-gradient-to-r from-sky-400 to-rose-400 text-white shadow-xs font-semibold px-2 py-1',
+      solidHeader: 'from-sky-500 via-rose-500 to-amber-500',
+      textAccent: 'text-amber-500 font-bold',
+      badgeBorder: 'border-rose-350'
     }
   };
 
@@ -347,7 +359,20 @@ function LolaWoodsSite() {
   const featuredBook = books.find(b => b.isFeatured) || books[0];
 
   return (
-    <div className="min-h-screen font-sans text-neutral-800 bg-neutral-50/60 selection:bg-amber-100 selection:text-amber-900">
+    <div className={`min-h-screen font-sans text-neutral-800 selection:bg-amber-100 selection:text-amber-900 transition-colors duration-500 ${
+      config.themeColor === 'patio'
+        ? 'bg-gradient-to-b from-sky-50 via-neutral-100/30 to-amber-50/20'
+        : 'bg-neutral-50/60'
+    }`}>
+      
+      {/* 🌸 Sol Andaluz Custom Header Announcement Banner 🌸 */}
+      {config.themeColor === 'patio' && (
+        <div id="patio-announcement-banner" className="bg-gradient-to-r from-sky-400 via-rose-450 to-amber-400 text-stone-900 py-1.5 px-4 text-center text-xs font-bold tracking-wide flex items-center justify-center gap-1.5 shadow-sm border-b border-rose-350 select-none animate-fade-in duration-300">
+          <span className="animate-spin-slow">🌸</span>
+          <span>¡Bienvenidos al Patio de Lola Woods! Romances, risas y enredos bajo el sol andaluz ☀️</span>
+          <span className="hidden sm:inline">🌸</span>
+        </div>
+      )}
       
       {/* -------------------------------------------------------------
           TOP BAR NAVIGATION & MARQUEE TITLE
@@ -453,40 +478,74 @@ function LolaWoodsSite() {
               <div id="section-home" className="space-y-16 animate-fade-in duration-300">
                 
                 {/* Hero Showcase Frame */}
-                <div className="relative rounded-2xl bg-gradient-to-br from-neutral-900 via-stone-900 to-amber-950 text-white p-8 md:p-14 overflow-hidden shadow-2xl">
-                  {/* Decorative background vectors representing pages */}
-                  <div className="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-amber-500/10 via-rose-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+                <div className={`relative rounded-2xl p-8 md:p-14 overflow-hidden shadow-2xl transition-all duration-500 ${
+                  config.themeColor === 'patio'
+                    ? 'bg-gradient-to-b from-sky-400 via-sky-100 to-amber-50 text-stone-900 border-2 border-sky-300'
+                    : 'bg-gradient-to-br from-neutral-900 via-stone-900 to-amber-950 text-white'
+                }`}>
+                  {/* Decorative themed background items */}
+                  {config.themeColor === 'patio' ? (
+                    <>
+                      {/* Sun vector glow */}
+                      <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-300 rounded-full opacity-60 blur-md animate-pulse pointer-events-none" />
+                      {/* Clouds */}
+                      <div className="absolute left-1/4 top-3 w-28 h-6 bg-white/90 rounded-full blur-xs shadow-xs pointer-events-none animate-bounce" style={{ animationDuration: '6s' }} />
+                      <div className="absolute right-1/3 top-8 w-20 h-5 bg-white/70 rounded-full blur-xs shadow-xs pointer-events-none animate-bounce" style={{ animationDuration: '8s' }} />
+                      {/* Flowers decoration hints */}
+                      <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-rose-400/10 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute right-4 bottom-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+                      
+                      {/* A mini playful clothesline hanging letters banner on top right decoration */}
+                      <div className="absolute right-12 top-4 hidden lg:flex items-center gap-1 opacity-70 scale-90 border-b border-dashed border-stone-400 pb-1 font-mono text-[9px] text-stone-600 font-bold select-none">
+                        <span>L</span><span>O</span><span>L</span><span>A</span> <span>W</span><span>O</span><span>O</span><span>D</span><span>S</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-amber-500/10 via-rose-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+                  )}
                   
                   <div className="relative z-10 grid md:grid-cols-12 gap-8 items-center">
                     <div className="md:col-span-8 space-y-6">
-                      <span className={`inline-block text-xs uppercase tracking-widest font-mono ${activeTheme.textAccent} font-bold`}>
+                      <span className={`inline-block text-xs uppercase tracking-widest font-mono ${config.themeColor === 'patio' ? 'text-rose-600 bg-rose-50 border border-rose-200 rounded px-2.5 py-0.5' : activeTheme.textAccent} font-bold`}>
                         {config.tagline}
                       </span>
-                      <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-wide drop-shadow-sm">
+                      <h1 className={`font-serif text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-wide drop-shadow-sm ${
+                        config.themeColor === 'patio' ? 'text-stone-950 font-bold' : 'text-white'
+                      }`}>
                         {config.heroHeadline}
                       </h1>
-                      <p className="text-neutral-300 text-base md:text-lg max-w-2xl leading-relaxed font-light">
+                      <p className={`text-base md:text-lg max-w-2xl leading-relaxed font-light ${
+                        config.themeColor === 'patio' ? 'text-stone-880' : 'text-neutral-300'
+                      }`}>
                         {config.heroSubtitle}
                       </p>
                       
                       <div className="pt-4 flex flex-wrap gap-4">
                         <button
                           id="hero-see-catalog-btn"
-                          className={`px-6 py-3 rounded-lg text-sm font-semibold tracking-wider uppercase transition-colors shadow-lg ${activeTheme.primaryBg} ${activeTheme.primaryBgHover} text-white`}
+                          className={`px-6 py-3 rounded-lg text-sm font-semibold tracking-wider uppercase transition-all duration-300 shadow-lg hover:scale-103 ${
+                            config.themeColor === 'patio'
+                              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-300/30'
+                              : `${activeTheme.primaryBg} ${activeTheme.primaryBgHover} text-white`
+                          }`}
                           onClick={() => setActiveTab('books')}
                         >
                           Explorar Catálogo
                         </button>
                         <button
                           id="hero-bio-btn"
-                          className="px-6 py-3 rounded-lg text-sm font-semibold tracking-wider uppercase bg-white/10 hover:bg-white/20 border border-white/25 transition-colors text-white"
+                          className={`px-6 py-3 rounded-lg text-sm font-semibold tracking-wider uppercase border transition-all duration-300 ${
+                            config.themeColor === 'patio'
+                              ? 'bg-white hover:bg-amber-100 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
+                              : 'bg-white/10 hover:bg-white/20 border-white/25 text-white'
+                          }`}
                           onClick={() => setActiveTab('bio')}
                         >
                           Conocer a Lola
                         </button>
                       </div>
                     </div>
-
+ 
                     <div className="md:col-span-4 flex justify-center">
                       {featuredBook ? (
                         <div 
@@ -494,7 +553,9 @@ function LolaWoodsSite() {
                           onClick={() => setSelectedBook(featuredBook)}
                         >
                           <BookCover book={featuredBook} size="xl" />
-                          <span className="text-yellow-400 text-xs tracking-widest uppercase font-semibold font-mono opacity-80 group-hover:opacity-100 flex items-center gap-1">
+                          <span className={`text-xs tracking-widest uppercase font-semibold font-mono opacity-80 group-hover:opacity-100 flex items-center gap-1 ${
+                            config.themeColor === 'patio' ? 'text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200' : 'text-yellow-400'
+                          }`}>
                             <Star className="w-3 h-3 fill-current" /> NOVEDAD DESTACADA
                           </span>
                         </div>
@@ -1290,6 +1351,7 @@ function LolaWoodsSite() {
                               value={configForm.themeColor || 'rose'}
                               onChange={(e) => setConfigForm({ ...configForm, themeColor: e.target.value as any })}
                             >
+                              <option value="patio">Sol Andaluz (Patio, Flores & Enredos) 🌸 - Temático</option>
                               <option value="rose">Fucsia Romántico (Chicle & Enredos)</option>
                               <option value="gold">Melocotón Divertido (Coral & Risas)</option>
                               <option value="emerald">Menta Fresca (Amigas & Confusiones)</option>

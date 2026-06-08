@@ -18,7 +18,7 @@ export const defaultSiteConfig: SiteConfig = {
   socialInstagram: "https://instagram.com/LolaWoodsOficial",
   socialFacebook: "https://facebook.com/LolaWoodsLibros",
   socialGoodreads: "https://goodreads.com/author/lola_woods",
-  themeColor: "rose",
+  themeColor: "patio",
   adminPasscode: "lola2026",
   footerRights: "© 2026 Lola Woods. Todos los derechos reservados. Todas las novelas de amor, risas y enredos son de su exclusiva propiedad.",
   genres: ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]
