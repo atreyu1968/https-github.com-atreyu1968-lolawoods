@@ -6,6 +6,7 @@
 import React, { useState, useRef } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import BookCover from './components/BookCover';
+import { ChailsoftLogo } from './components/ChailsoftLogo';
 import { Book, AuthorEvent, SiteConfig } from './types';
 import { 
   BookOpen, 
@@ -62,6 +63,8 @@ function LolaWoodsSite() {
   const [activeTab, setActiveTab] = useState<'home' | 'books' | 'bio' | 'events' | 'contact' | 'admin'>('home');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [newGenreName, setNewGenreName] = useState('');
 
   // Contact form states
   const [contactName, setContactName] = useState('');
@@ -104,64 +107,64 @@ function LolaWoodsSite() {
   // Setup visual colors based on db site configuration dynamically
   const themes = {
     gold: {
-      primary: 'text-amber-700',
-      primaryBg: 'bg-amber-600',
-      primaryBgHover: 'hover:bg-amber-700',
-      accentBg: 'bg-amber-50',
-      borderAccent: 'border-amber-200',
-      focusRing: 'focus:ring-amber-500',
-      badgeBg: 'bg-amber-100 text-amber-800',
-      solidHeader: 'from-amber-900 to-amber-950',
-      textAccent: 'text-amber-600',
-      badgeBorder: 'border-amber-300'
+      primary: 'text-orange-600',
+      primaryBg: 'bg-orange-500',
+      primaryBgHover: 'hover:bg-orange-600',
+      accentBg: 'bg-orange-50/70',
+      borderAccent: 'border-orange-200',
+      focusRing: 'focus:ring-orange-400',
+      badgeBg: 'bg-orange-100 text-orange-700',
+      solidHeader: 'from-orange-500 to-rose-500',
+      textAccent: 'text-orange-500',
+      badgeBorder: 'border-orange-300'
     },
     rose: {
-      primary: 'text-rose-700',
-      primaryBg: 'bg-rose-600',
-      primaryBgHover: 'hover:bg-rose-700',
-      accentBg: 'bg-rose-50',
-      borderAccent: 'border-rose-200',
-      focusRing: 'focus:ring-rose-500',
-      badgeBg: 'bg-rose-100 text-rose-800',
-      solidHeader: 'from-rose-900 to-rose-950',
-      textAccent: 'text-rose-600',
-      badgeBorder: 'border-rose-300'
+      primary: 'text-pink-600',
+      primaryBg: 'bg-pink-500',
+      primaryBgHover: 'hover:bg-pink-600',
+      accentBg: 'bg-pink-50/70',
+      borderAccent: 'border-pink-200',
+      focusRing: 'focus:ring-pink-400',
+      badgeBg: 'bg-pink-100 text-pink-700',
+      solidHeader: 'from-pink-500 to-rose-600',
+      textAccent: 'text-pink-500',
+      badgeBorder: 'border-pink-300'
     },
     emerald: {
-      primary: 'text-emerald-700',
-      primaryBg: 'bg-emerald-600',
-      primaryBgHover: 'hover:bg-emerald-700',
-      accentBg: 'bg-emerald-50',
-      borderAccent: 'border-emerald-200',
-      focusRing: 'focus:ring-emerald-500',
-      badgeBg: 'bg-emerald-100 text-emerald-800',
-      solidHeader: 'from-emerald-900 to-emerald-950',
-      textAccent: 'text-emerald-600',
-      badgeBorder: 'border-emerald-300'
+      primary: 'text-teal-600',
+      primaryBg: 'bg-teal-500',
+      primaryBgHover: 'hover:bg-teal-600',
+      accentBg: 'bg-teal-50/70',
+      borderAccent: 'border-teal-200',
+      focusRing: 'focus:ring-teal-400',
+      badgeBg: 'bg-teal-100 text-teal-700',
+      solidHeader: 'from-teal-500 to-cyan-600',
+      textAccent: 'text-teal-500',
+      badgeBorder: 'border-teal-300'
     },
     amber: {
-      primary: 'text-amber-800',
-      primaryBg: 'bg-amber-700',
-      primaryBgHover: 'hover:bg-amber-800',
-      accentBg: 'bg-amber-50/50',
-      borderAccent: 'border-amber-300',
-      focusRing: 'focus:ring-amber-600',
-      badgeBg: 'bg-amber-500/10 text-amber-700',
-      solidHeader: 'from-amber-800 to-amber-900',
+      primary: 'text-amber-600',
+      primaryBg: 'bg-amber-500',
+      primaryBgHover: 'hover:bg-amber-600',
+      accentBg: 'bg-amber-50/70',
+      borderAccent: 'border-amber-200',
+      focusRing: 'focus:ring-amber-400',
+      badgeBg: 'bg-amber-100 text-amber-700',
+      solidHeader: 'from-amber-400 to-orange-500',
       textAccent: 'text-amber-500',
-      badgeBorder: 'border-amber-500'
+      badgeBorder: 'border-amber-300'
     },
     slate: {
-      primary: 'text-slate-800',
-      primaryBg: 'bg-slate-700',
-      primaryBgHover: 'hover:bg-slate-800',
-      accentBg: 'bg-slate-100/50',
-      borderAccent: 'border-slate-300',
-      focusRing: 'focus:ring-slate-600',
-      badgeBg: 'bg-slate-500/10 text-slate-700',
-      solidHeader: 'from-slate-800 to-slate-900',
-      textAccent: 'text-slate-500',
-      badgeBorder: 'border-slate-500'
+      primary: 'text-purple-600',
+      primaryBg: 'bg-purple-500',
+      primaryBgHover: 'hover:bg-purple-600',
+      accentBg: 'bg-purple-50/70',
+      borderAccent: 'border-purple-200',
+      focusRing: 'focus:ring-purple-400',
+      badgeBg: 'bg-purple-100 text-purple-700',
+      solidHeader: 'from-purple-500 to-indigo-600',
+      textAccent: 'text-purple-500',
+      badgeBorder: 'border-purple-300'
     }
   };
 
@@ -386,29 +389,10 @@ function LolaWoodsSite() {
                   {item.label}
                 </button>
               ))}
-              <button
-                id="nav-tab-admin"
-                className={`ml-4 flex items-center gap-1.5 px-3.5 py-1.5 border border-dashed rounded text-xs tracking-wider uppercase font-semibold transition-all ${
-                  activeTab === 'admin'
-                    ? 'border-solid border-rose-500 text-rose-600 bg-rose-50'
-                    : 'border-neutral-300 text-neutral-500 hover:text-rose-500 hover:border-rose-400'
-                }`}
-                onClick={() => setActiveTab('admin')}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                Panel Admin
-              </button>
             </div>
 
             {/* Mobile menu toggle */}
             <div className="flex md:hidden items-center gap-2">
-              <button
-                id="nav-tab-admin-mobile"
-                className="p-1 px-2 border border-stone-200 rounded text-neutral-500 hover:text-rose-500"
-                onClick={() => setActiveTab('admin')}
-              >
-                <Settings className="w-4 h-4" />
-              </button>
               <button
                 id="mobile-menu-toggle"
                 className="p-1 text-neutral-500 hover:text-neutral-900"
@@ -635,14 +619,15 @@ function LolaWoodsSite() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 justify-center border-b border-neutral-200 pb-4">
-                  {['Todos', 'Romance Histórico', 'Intriga Romántica', 'Romance Contemporáneo', 'Otros'].map((g) => {
-                    const active = g === 'Todos'; // we can map filters locally
+                  {['Todos', ...Array.from(new Set(books.map(b => b.genre).filter(Boolean)))].map((g) => {
+                    const active = g === selectedCategory;
                     return (
                       <span
                         key={g}
+                        onClick={() => setSelectedCategory(g)}
                         className={`cursor-pointer px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                           active
-                            ? `${activeTheme.badgeBg} ${activeTheme.badgeBorder} border`
+                            ? `${activeTheme.badgeBg} ${activeTheme.badgeBorder} border shadow-xs scale-102`
                             : 'bg-neutral-100 hover:bg-neutral-200 text-stone-600'
                         }`}
                       >
@@ -658,7 +643,7 @@ function LolaWoodsSite() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                    {books.map((book) => (
+                    {books.filter(b => selectedCategory === 'Todos' || b.genre === selectedCategory).map((book) => (
                       <div
                         id={`catalog-book-card-${book.id}`}
                         key={book.id}
@@ -1302,17 +1287,119 @@ function LolaWoodsSite() {
                             <label className="text-[11px] font-bold text-stone-600 font-mono uppercase">Tema de Color del Sitio</label>
                             <select
                               className="w-full text-xs px-3 py-2 border rounded"
-                              value={configForm.themeColor || 'gold'}
+                              value={configForm.themeColor || 'rose'}
                               onChange={(e) => setConfigForm({ ...configForm, themeColor: e.target.value as any })}
                             >
-                              <option value="gold">Oro Literario (Gold)</option>
-                              <option value="rose">Rosa Romántico (Rose)</option>
-                              <option value="emerald">Verde Histórico (Emerald)</option>
-                              <option value="amber">Ámbar Acogedor (Amber)</option>
-                              <option value="slate">Pizarra Minimalista (Slate)</option>
+                              <option value="rose">Fucsia Romántico (Chicle & Enredos)</option>
+                              <option value="gold">Melocotón Divertido (Coral & Risas)</option>
+                              <option value="emerald">Menta Fresca (Amigas & Confusiones)</option>
+                              <option value="amber">Girasol Risas (Sol & Finales Felices)</option>
+                              <option value="slate">Lavanda Dulce (Suspiros & Cafeterías)</option>
                             </select>
                           </div>
+
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[11px] font-bold text-stone-600 font-mono uppercase">Texto de Derechos de Autor (Pie de Página)</label>
+                            <textarea
+                              rows={2}
+                              className="w-full text-xs px-3 py-2 border rounded leading-relaxed bg-white font-mono text-zinc-700 font-light"
+                              placeholder="© 2026 Lola Woods. Todos los derechos reservados..."
+                              value={configForm.footerRights || ''}
+                              onChange={(e) => setConfigForm({ ...configForm, footerRights: e.target.value })}
+                            />
+                          </div>
                         </div>
+                      </div>
+
+                      {/* Genres Management Panel */}
+                      <div className="border border-neutral-200 bg-stone-50/50 p-4 rounded-lg space-y-3">
+                        <div className="flex justify-between items-center pb-2 border-b border-stone-200">
+                          <h4 className="text-xs font-bold text-stone-700 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                            <BookOpen className="w-3.5 h-3.5 text-rose-600" /> 1.2 Gestión de Géneros Literarios
+                          </h4>
+                          <span className="text-[10px] text-zinc-500 font-mono">{(configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]).length} géneros</span>
+                        </div>
+                        
+                        <p className="text-[11px] text-zinc-500 leading-relaxed font-light">
+                          Modifica los nombres de los géneros o elimina los que no utilices. Recuerda que <strong className="font-semibold text-stone-700">solo los géneros con novelas asignadas</strong> se muestran en los botones de filtro públicos de la biblioteca.
+                        </p>
+
+                        <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 bg-white p-2 rounded border border-neutral-200 shadow-inner">
+                          {(configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]).map((g, idx) => (
+                            <div key={idx} className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                className="w-full text-xs px-2.5 py-1.5 border border-stone-200 rounded leading-none bg-stone-50 text-stone-800 font-mono hover:bg-white focus:bg-white focus:ring-1 focus:ring-rose-500 transition-all font-medium"
+                                value={g}
+                                onChange={(e) => {
+                                  const updated = [...(configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"])];
+                                  updated[idx] = e.target.value;
+                                  setConfigForm({ ...configForm, genres: updated });
+                                }}
+                              />
+                              <button
+                                type="button"
+                                className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-neutral-100 rounded transition"
+                                title="Eliminar Género"
+                                onClick={() => {
+                                  const updated = (configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]).filter((_, i) => i !== idx);
+                                  setConfigForm({ ...configForm, genres: updated });
+                                }}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Add new genre option */}
+                        <div className="flex gap-2 items-center pt-1.5">
+                          <input
+                            type="text"
+                            placeholder="Nuevo género literario... Ej: Comedia Romántica"
+                            className="flex-1 text-xs px-3 py-1.5 border border-stone-200 rounded font-mono"
+                            value={newGenreName}
+                            onChange={(e) => setNewGenreName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const trimmed = newGenreName.trim();
+                                if (trimmed) {
+                                  const current = configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"];
+                                  if (!current.includes(trimmed)) {
+                                    setConfigForm({ ...configForm, genres: [...current, trimmed] });
+                                    setNewGenreName('');
+                                  } else {
+                                    alert("El género ya existe");
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-white inline-flex items-center gap-1 transition-all ${
+                              newGenreName.trim() ? 'bg-amber-600 hover:bg-amber-700' : 'bg-stone-300 text-stone-500 pointer-events-none'
+                            }`}
+                            onClick={() => {
+                              const trimmed = newGenreName.trim();
+                              if (trimmed) {
+                                const current = configForm.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"];
+                                if (!current.includes(trimmed)) {
+                                  setConfigForm({ ...configForm, genres: [...current, trimmed] });
+                                  setNewGenreName('');
+                                } else {
+                                  alert("El género ya existe");
+                                }
+                              }
+                            }}
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Añadir
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-stone-400 italic">
+                          * Presiona el botón verde "Guardar Todo" arriba para guardar permanentemente todos tus cambios.
+                        </p>
                       </div>
 
                     </form>
@@ -1385,15 +1472,13 @@ function LolaWoodsSite() {
                                 <div className="space-y-1">
                                   <label className="font-bold text-stone-500 font-mono uppercase">Género Literario</label>
                                   <select
-                                    className="w-full p-2 border rounded bg-white"
-                                    value={bookForm.genre || 'Romance Histórico'}
+                                    className="w-full p-2 border rounded bg-white text-xs"
+                                    value={bookForm.genre || (config.genres && config.genres[0]) || 'Romance Histórico'}
                                     onChange={(e) => setBookForm({ ...bookForm, genre: e.target.value })}
                                   >
-                                    <option value="Romance Histórico">Romance Histórico</option>
-                                    <option value="Intriga Romántica">Intriga Romántica</option>
-                                    <option value="Romance Contemporáneo">Romance Contemporáneo</option>
-                                    <option value="Fantasía Romántica">Fantasía Romántica</option>
-                                    <option value="Otros">Otros</option>
+                                    {(config.genres || ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]).map((g) => (
+                                      <option key={g} value={g}>{g}</option>
+                                    ))}
                                   </select>
                                 </div>
                                 <div className="space-y-1">
@@ -2001,18 +2086,15 @@ function LolaWoodsSite() {
           FOOTER CREDIT SIGN INDICATORS
           ------------------------------------------------------------- */}
       <footer className="border-t border-neutral-200 bg-white py-12 mt-16 text-neutral-500 text-sm select-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
           
-          <div className="space-y-1">
-            <p className="font-serif text-base font-bold text-stone-800 tracking-wider">
-              © {new Date().getUTCFullYear()} Sitio Oficial de Lola Woods.
-            </p>
-            <p className="text-[11px] text-zinc-400 font-mono">
-              Todos los derechos de propiedad intelectual de las novelas reservadas por woods-editorial.
+          <div className="space-y-1 max-w-sm md:max-w-md">
+            <p className="text-xs text-neutral-400 select-all font-light leading-relaxed">
+              {config.footerRights || `© ${new Date().getUTCFullYear()} Lola Woods. Todos los derechos reservados. Todas las novelas de amor, risas y enredos son de su exclusiva propiedad.`}
             </p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap justify-center">
             <button id="footer-home-btn" className="hover:text-stone-800 text-xs transition" onClick={() => setActiveTab('home')}>Inicio</button>
             <span className="text-zinc-300">•</span>
             <button id="footer-books-btn" className="hover:text-stone-800 text-xs transition" onClick={() => setActiveTab('books')}>Mis Libros</button>
@@ -2020,6 +2102,16 @@ function LolaWoodsSite() {
             <button id="footer-bio-btn" className="hover:text-stone-800 text-xs transition" onClick={() => setActiveTab('bio')}>Biografía</button>
             <span className="text-zinc-300">•</span>
             <button id="footer-admin-btn" className={`hover:text-rose-600 text-xs transition font-mono ${activeTab === 'admin' ? 'text-rose-500 font-bold' : ''}`} onClick={() => setActiveTab('admin')}>Administrador</button>
+          </div>
+
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <span className="text-[9px] tracking-widest text-neutral-400 font-mono uppercase font-bold">Desarrollado por</span>
+            <div 
+              className="inline-flex items-center"
+              title="Chailsoft Software Solutions"
+            >
+              <ChailsoftLogo className="h-8 md:h-10 w-auto" />
+            </div>
           </div>
           
         </div>

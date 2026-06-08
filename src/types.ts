@@ -74,4 +74,6 @@ export interface SiteConfig {
   socialGoodreads?: string;
   themeColor: 'gold' | 'emerald' | 'rose' | 'amber' | 'slate';
   adminPasscode: string;
+  footerRights?: string;
+  genres?: string[];
 }

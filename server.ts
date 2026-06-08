@@ -80,14 +80,14 @@ db.exec(`
 const defaultSiteConfig = {
   authorName: "Lola Woods",
   authorPseudonym: "Lola Woods",
-  tagline: "Novelas de amor, secretos de familia e intrigas irresistibles.",
-  heroHeadline: "Viaja con el corazón a través de mis historias",
-  heroSubtitle: "Descubre mundos donde el amor siempre abre caminos inesperados y los secretos del pasado cobran vida.",
-  bioHeadline: "Detrás del seudónimo",
-  bioText1: "Nacida entre los verdes bosques del norte de España, Lola Woods descubrió su vocación literaria al abrigo de las leyendas familiares y las tardes de lluvia. Bajo este seudónimo, da vida a relatos donde las emociones intensas, la intriga sutil y el empoderamiento femenino se entrelazan de forma natural.",
-  bioText2: "Con más de quince novelas en su haber, se ha convertido en una firma indispensable de la literatura romántica contemporánea e histórica en español, atrapando a miles de lectores con una prosa elegante y personajes memorables llenos de luz, matices y pasión.",
-  quote: "Escribir no es solo inventar historias; es abrir una ventana para que las almas vuelen alto y sientan sin límites.",
-  quoteSource: "Entrevista en El Refugio de las Letras, 2025",
+  tagline: "Novelas de comedia romántica llenas de enredos, risas y finales de película.",
+  heroHeadline: "Encuentra el amor entre risas y enredos inesperados",
+  heroSubtitle: "Descubre historias frescas donde el amor siempre gana la partida (aunque comience con el pie izquierdo y un café derramado).",
+  bioHeadline: "Detrás de las sonrisas",
+  bioText1: "Nacida entre cafés acogedores y tardes soleadas, Lola Woods descubrió que la risa es el camino más directo al corazón. Bajo su seudónimo, escribe novelas de comedia romántica contemporánea e histórica donde los malentendidos simpáticos, los diálogos chispeantes y el amor verdadero son siempre los protagonistas.",
+  bioText2: "Con más de quince novelas que han hecho suspirar y reír a carcajadas a miles de lectoras, es una de las voces más querdas del romance feliz en español, destacando por sus personajes entrañables, un humor ágil y un optimismo contagioso.",
+  quote: "Escribir comedia romántica es un recordatorio de que no importa cuán torpe o enredada sea la vida, el amor siempre tiene un final feliz esperando.",
+  quoteSource: "Entrevista en Club del Lector Alegre, 2026",
   profileImage: "",
   agentName: "Representaciones Literarias Mundiales",
   agentContact: "contacto@lolawoods-literary.com",
@@ -95,8 +95,10 @@ const defaultSiteConfig = {
   socialInstagram: "https://instagram.com/LolaWoodsOficial",
   socialFacebook: "https://facebook.com/LolaWoodsLibros",
   socialGoodreads: "https://goodreads.com/author/lola_woods",
-  themeColor: "gold",
-  adminPasscode: "lola2026"
+  themeColor: "rose",
+  adminPasscode: "lola2026",
+  footerRights: "© 2026 Lola Woods. Todos los derechos reservados. Todas las novelas de amor, risas y enredos son de su exclusiva propiedad.",
+  genres: ["Romance Histórico", "Intriga Romántica", "Romance Contemporáneo", "Comedia Romántica", "Fantasía Romántica"]
 };
 
 const defaultBooks = [
