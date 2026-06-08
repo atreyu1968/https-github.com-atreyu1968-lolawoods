@@ -358,9 +358,6 @@ function LolaWoodsSite() {
                 <span className="font-serif text-xl font-bold tracking-widest uppercase">
                   {config.authorPseudonym}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-rose-500 font-mono font-medium border border-rose-200 rounded px-1.5 py-0.5 bg-rose-50">
-                  SQLite DB
-                </span>
               </span>
             </div>
 
