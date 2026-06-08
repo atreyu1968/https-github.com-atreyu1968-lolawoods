@@ -61,6 +61,7 @@ function LolaWoodsSite() {
     updateInfluencerStatus,
     deleteInfluencerApp,
     isAdminAuthenticated,
+    adminPasscode,
     triggerLogin,
     triggerLogout,
     loading
@@ -106,6 +107,7 @@ function LolaWoodsSite() {
   // Admin management states
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isAddingBook, setIsAddingBook] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [bookForm, setBookForm] = useState<Partial<Book>>({
     title: '', subtitle: '', description: '', synopsis: '', genre: 'Romance Histórico',
     isbn: '', pages: 300, publisher: 'Woods Editorial', publishDate: '', coverImage: '',
@@ -207,20 +209,56 @@ function LolaWoodsSite() {
     setConfigForm({ ...config });
   }, [config]);
 
-  // Handle Cover Art File Upload -> Base64
+  // Handle Cover Art File Upload -> Upload to server storage
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1200000) { // Limit to ~1.2MB for indexed database storage limit
-      alert("La imagen seleccionada supera el límite recomendado de 1MB. Por favor, cargue un archivo más ligero.");
+    if (file.size > 20000000) { // Limit to 20MB for high quality covers since they are stored on server storage
+      alert("La imagen seleccionada supera el límite recomendado de 20MB.");
       return;
     }
 
+    setIsUploadingCover(true);
+
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onerror = () => {
+      alert("Error al leer el archivo.");
+      setIsUploadingCover(false);
+    };
+    reader.onload = async () => {
       if (typeof reader.result === 'string') {
-        setBookForm(prev => ({ ...prev, coverImage: reader.result }));
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-passcode': adminPasscode
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              base64Data: reader.result
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `Estado: ${res.status}`);
+          }
+
+          const data = await res.json();
+          if (data.success && data.url) {
+            setBookForm(prev => ({ ...prev, coverImage: data.url }));
+          } else {
+            throw new Error("Respuesta incorrecta del servidor");
+          }
+        } catch (uploadErr: any) {
+          alert("Error al subir la portada al almacenamiento del servidor: " + uploadErr.message);
+        } finally {
+          setIsUploadingCover(false);
+        }
+      } else {
+        setIsUploadingCover(false);
       }
     };
     reader.readAsDataURL(file);
@@ -1921,15 +1959,20 @@ function LolaWoodsSite() {
                               </div>
 
                               {/* PORTADA IMAGE FILE UPLOAD CO-ENGINES */}
-                              <div className="border border-stone-200 rounded p-3 bg-white space-y-2 text-center">
+                              <div className="border border-stone-200 rounded p-3 bg-white space-y-2 text-center relative">
                                 <span className="text-[10px] font-bold text-stone-500 block uppercase font-mono text-left">Subir Imagen de Portada (PNG / JPG)</span>
                                 
-                                {bookForm.coverImage ? (
+                                {isUploadingCover ? (
+                                  <div className="flex flex-col items-center justify-center p-8 gap-2">
+                                    <div className="w-8 h-8 rounded-full border-2 border-neutral-200 border-t-amber-500 animate-spin" />
+                                    <span className="text-xs text-neutral-500 animate-pulse">Subiendo portada al servidor...</span>
+                                  </div>
+                                ) : bookForm.coverImage ? (
                                   <div className="relative inline-block w-20 h-28 border rounded shadow overflow-hidden group">
                                     <img src={bookForm.coverImage} className="w-full h-full object-cover" />
                                     <button
                                       type="button"
-                                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"
+                                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity text-xs font-bold"
                                       onClick={() => setBookForm({ ...bookForm, coverImage: '' })}
                                     >
                                       ELIMINAR
@@ -1942,7 +1985,7 @@ function LolaWoodsSite() {
                                   >
                                     <Upload className="w-6 h-6 text-neutral-400" />
                                     <span className="font-semibold text-neutral-600 block">Pulse para examinar portada</span>
-                                    <span>Formato JPG/PNG menor de 1MB</span>
+                                    <span>Se guardará en el almacenamiento del servidor</span>
                                     <input
                                       ref={fileInputRef}
                                       type="file"
@@ -2588,9 +2631,11 @@ function LolaWoodsSite() {
               className="inline-flex items-center"
               title="Chailsoft Software Solutions"
             >
-              <ChailsoftLogo className="h-8 md:h-10 w-auto" />
+              <ChailsoftLogo className="h-7 md:h-9 w-auto" />
             </div>
           </div>
+
+
           
         </div>
       </footer>

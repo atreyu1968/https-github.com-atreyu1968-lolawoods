@@ -30,13 +30,6 @@ export function ChailsoftLogo({ className = "h-6", height }: ChailsoftLogoProps)
             <stop offset="100%" stopColor="#7a7a7a" />
           </linearGradient>
 
-          {/* Silver metallic gradient for the text */}
-          <linearGradient id="textSilverGrad" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#8c8c8c" />
-            <stop offset="40%" stopColor="#1a1a1a" />
-            <stop offset="100%" stopColor="#444444" />
-          </linearGradient>
-
           {/* Simple shadow for 3D look */}
           <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
             <feDropShadow dx="2" dy="4" stdDeviation="3" floodOpacity="0.15" />
@@ -82,7 +75,6 @@ export function ChailsoftLogo({ className = "h-6", height }: ChailsoftLogoProps)
         </g>
 
         {/* --- BRAND TEXT: "chailsoft" --- */}
-        {/* "chail" styled with an elegant silver-charcoal look */}
         <text
           x="215"
           y="112"
@@ -95,7 +87,6 @@ export function ChailsoftLogo({ className = "h-6", height }: ChailsoftLogoProps)
           chail
         </text>
 
-        {/* "soft" styled in vivid tech-blue matching of the brand */}
         <text
           x="355"
           y="112"

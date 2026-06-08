@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Database from 'better-sqlite3';
 import { createServer as createViteServer } from 'vite';
@@ -22,10 +23,20 @@ const getDirname = () => {
 const __dirname = getDirname();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const DB_PATH = path.resolve(process.cwd(), 'lola_woods.db');
+const UPLOADS_DIR = path.resolve(process.cwd(), 'uploads');
+
+// Ensure the uploads directory exists on disk
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // Allow uploading Base64 book covers
+app.use(express.json({ limit: '50mb' })); // Increased limit to allow uploading larger high-quality book covers
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve uploaded files statically under /uploads
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // -------------------------------------------------------------
 // DATABASE INITIALIZATION
@@ -289,6 +300,51 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
 // -------------------------------------------------------------
 // REST API ENDPOINTS
 // -------------------------------------------------------------
+
+// --- File Upload ---
+app.post('/api/upload', requireAdmin, (req, res) => {
+  try {
+    const { filename, base64Data } = req.body;
+    if (!base64Data) {
+      return res.status(400).json({ error: "No se proporcionaron datos de imagen" });
+    }
+
+    // Match Base64 data URL patterns
+    const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: "Formato de imagen Base64 inválido" });
+    }
+
+    const contentType = matches[1];
+    const base64Content = matches[2];
+    const dataBuffer = Buffer.from(base64Content, 'base64');
+
+    // Get file extension from MIME type
+    let ext = 'jpg';
+    if (contentType.includes('png')) ext = 'png';
+    else if (contentType.includes('webp')) ext = 'webp';
+    else if (contentType.includes('gif')) ext = 'gif';
+    else if (contentType.includes('svg+xml')) ext = 'svg';
+
+    // Form safe basename
+    let safeBaseName = 'cover';
+    if (filename) {
+      const parsed = path.parse(filename);
+      safeBaseName = parsed.name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+    }
+
+    // Name with timestamp to prevent browser cache collisions
+    const finalFilename = `${safeBaseName}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}.${ext}`;
+    const targetPath = path.join(UPLOADS_DIR, finalFilename);
+
+    fs.writeFileSync(targetPath, dataBuffer);
+
+    // Return absolute public path to access the file on the server
+    res.json({ success: true, url: `/uploads/${finalFilename}` });
+  } catch (err: any) {
+    res.status(500).json({ error: `Error de subida: ${err.message}` });
+  }
+});
 
 // --- SiteConfig ---
 app.get('/api/config', (req, res) => {
