@@ -5,11 +5,23 @@ import { fileURLToPath } from 'url';
 import Database from 'better-sqlite3';
 import { createServer as createViteServer } from 'vite';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Safe __dirname fallback for ESM/CJS compatibility
+const getDirname = () => {
+  try {
+    if (typeof __dirname !== 'undefined' && __dirname) {
+      return __dirname;
+    }
+  } catch (e) {}
+  try {
+    return path.dirname(fileURLToPath(import.meta.url));
+  } catch (e) {
+    return process.cwd();
+  }
+};
 
+const __dirname = getDirname();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-const DB_PATH = path.resolve(__dirname, 'lola_woods.db');
+const DB_PATH = path.resolve(process.cwd(), 'lola_woods.db');
 
 const app = express();
 app.use(cors());
@@ -595,7 +607,7 @@ async function boot() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(__dirname, 'dist');
+    const distPath = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
