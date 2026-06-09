@@ -108,6 +108,7 @@ function LolaWoodsSite() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingProfile, setIsUploadingProfile] = useState(false);
   const [bookForm, setBookForm] = useState<Partial<Book>>({
     title: '', subtitle: '', description: '', synopsis: '', genre: 'Romance Histórico',
     isbn: '', pages: 300, publisher: 'Woods Editorial', publishDate: '', coverImage: '',
@@ -125,6 +126,7 @@ function LolaWoodsSite() {
 
   // For image upload conversion to Base64
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
 
   // Setup visual colors based on db site configuration dynamically
   const themes = {
@@ -214,8 +216,8 @@ function LolaWoodsSite() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 20000000) { // Limit to 20MB for high quality covers since they are stored on server storage
-      alert("La imagen seleccionada supera el límite recomendado de 20MB.");
+    if (file.size > 52428800) { // Limit to 50MB for high quality covers (50 * 1024 * 1024)
+      alert("La imagen seleccionada supera el límite recomendado de 50MB.");
       return;
     }
 
@@ -259,6 +261,61 @@ function LolaWoodsSite() {
         }
       } else {
         setIsUploadingCover(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handle Author Profile Image File Upload -> Upload to server storage
+  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 52428800) { // Limit to 50MB
+      alert("La imagen seleccionada supera el límite recomendado de 50MB.");
+      return;
+    }
+
+    setIsUploadingProfile(true);
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      alert("Error al leer el archivo.");
+      setIsUploadingProfile(false);
+    };
+    reader.onload = async () => {
+      if (typeof reader.result === 'string') {
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-passcode': adminPasscode
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              base64Data: reader.result
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `Estado: ${res.status}`);
+          }
+
+          const data = await res.json();
+          if (data.success && data.url) {
+            setConfigForm(prev => ({ ...prev, profileImage: data.url }));
+          } else {
+            throw new Error("Respuesta incorrecta del servidor");
+          }
+        } catch (uploadErr: any) {
+          alert("Error al subir la imagen de perfil al almacenamiento del servidor: " + uploadErr.message);
+        } finally {
+          setIsUploadingProfile(false);
+        }
+      } else {
+        setIsUploadingProfile(false);
       }
     };
     reader.readAsDataURL(file);
@@ -1600,14 +1657,35 @@ function LolaWoodsSite() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-stone-600 font-mono uppercase">Imagen de Perfil Artística (URL o Base64 string)</label>
-                          <input
-                            type="text"
-                            className="w-full text-xs px-3 py-2 border rounded"
-                            placeholder="URL de foto o deje en blanco para retrato por defecto..."
-                            value={configForm.profileImage || ''}
-                            onChange={(e) => setConfigForm({ ...configForm, profileImage: e.target.value })}
-                          />
+                          <label className="text-[11px] font-bold text-stone-600 font-mono uppercase">Imagen de Perfil Artística</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              className="flex-1 text-xs px-3 py-2 border rounded bg-neutral-50"
+                              placeholder="URL de foto o ruta subida..."
+                              value={configForm.profileImage || ''}
+                              onChange={(e) => setConfigForm({ ...configForm, profileImage: e.target.value })}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => profileImageInputRef.current?.click()}
+                              disabled={isUploadingProfile}
+                              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 dark:hover:bg-neutral-800 disabled:opacity-50 rounded text-xs font-semibold text-stone-700 select-none cursor-pointer flex items-center gap-1.5 transition-colors"
+                            >
+                              <Upload className="w-4 h-4" />
+                              {isUploadingProfile ? 'Subiendo...' : 'Subir archivo'}
+                            </button>
+                            <input
+                              ref={profileImageInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleProfileImageUpload}
+                            />
+                          </div>
+                          <p className="text-[10px] text-stone-500 font-mono mt-0.5">
+                            Soporta imágenes de alta resolución mayores a 1 MB (máx. 50 MB) cargadas directamente.
+                          </p>
                         </div>
                       </div>
 
@@ -1985,7 +2063,7 @@ function LolaWoodsSite() {
                                   >
                                     <Upload className="w-6 h-6 text-neutral-400" />
                                     <span className="font-semibold text-neutral-600 block">Pulse para examinar portada</span>
-                                    <span>Se guardará en el almacenamiento del servidor</span>
+                                    <span>Almacenamiento directo (soporta imágenes &gt; 1 MB, máx. 50 MB)</span>
                                     <input
                                       ref={fileInputRef}
                                       type="file"
