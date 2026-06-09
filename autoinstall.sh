@@ -74,6 +74,8 @@ if [ -d "$INSTALL_DIR/.git" ]; then
   fi
   
   cd "$INSTALL_DIR"
+  echo -e "[*] Configurando el directorio como seguro para git..."
+  git config --global --add safe.directory "$INSTALL_DIR"
   echo -e "[*] Limpiando cambios locales temporales no commiteados para evitar conflictos..."
   git reset --hard HEAD
   echo -e "[*] Descargando últimas actualizaciones..."
